@@ -1,48 +1,74 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useOrderStore } from '@/hooks/use-order-store';
-import { FlashList } from '@shopify/flash-list';
-import { router, Stack } from 'expo-router';
-import { Button } from 'react-native';
+import { Stack } from 'expo-router';
+import { Button, Platform, Vibration, StyleSheet, View } from 'react-native';
 
-const OrderList = () => {
-
-  const orders = useOrderStore(state => state.orders);
-
-  return (
-    <FlashList
-      data={orders}
-      renderItem={({ item }) => <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
-        <ThemedText>{item.coffee.name} x {item.amount}</ThemedText>
-        <ThemedText>{(item.coffee.price * item.amount).toLocaleString("be-NL", { style: "currency", currency: "EUR" })}</ThemedText>
-      </ThemedView>}
-    />
-  );
-
+const Separator: React.FC = () => {
+  return <ThemedView style={Platform.OS === 'android' ? styles.separator : undefined} />;
 };
 
 export default function OrderScreen() {
+  const ONE_SECOND_IN_MS = 1000;
 
-  const orders = useOrderStore(state => state.orders);
-  const resetOrders = useOrderStore(state => state.resetOrders);
-  const total = orders.reduce((sum, order) => sum + order.coffee.price * order.amount, 0);
+  const PATTERN: number[] = [
+    1 * ONE_SECOND_IN_MS, // wait 1s
+    2 * ONE_SECOND_IN_MS, // vibrate 2s
+    3 * ONE_SECOND_IN_MS, // wait 3s
+  ];
 
-  const handleConfirmOrder = () => {
-    resetOrders();
-    router.push('/(tabs)/order/confirmation');
-  };
+  const PATTERN_DESC: string =
+    Platform.OS === 'android'
+      ? 'wait 1s, vibrate 2s, wait 3s'
+      : 'wait 1s, vibrate, wait 2s, vibrate, wait 3s';
 
   return (
-    <ThemedView style={{ flex: 1 }}>
-      <Stack.Screen options={{ title: 'Order' }} />
-      <OrderList />
-      <ThemedView>
-        <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
-          <ThemedText type="defaultSemiBold">Total</ThemedText>
-          <ThemedText type="defaultSemiBold">{total.toLocaleString("be-NL", { style: "currency", currency: "EUR" })}</ThemedText>
-        </ThemedView>
-        <Button title='Confirm Order' onPress={handleConfirmOrder} />
-      </ThemedView>
+    <ThemedView style={{ flex: 1, padding: 16 }}>
+      <Stack.Screen options={{ title: 'Vibration Menu' }} />
+
+      <ThemedText>Hallo</ThemedText>
+
+      <View style={{ marginTop: 24 }}>
+        <Button title="Vibrate once" onPress={() => Vibration.vibrate()} />
+      </View>
+
+      <Separator />
+
+      {Platform.OS === 'android' && (
+        <>
+          <View>
+            <Button
+              title="Vibrate for 10 seconds"
+              onPress={() => Vibration.vibrate(10 * ONE_SECOND_IN_MS)}
+            />
+          </View>
+          <Separator />
+        </>
+      )}
+
+      <ThemedText style={styles.paragraph}>Pattern: {PATTERN_DESC}</ThemedText>
+
+      <Button title="Vibrate with pattern" onPress={() => Vibration.vibrate(PATTERN)} />
+      <Separator />
+
+      <Button
+        title="Vibrate with pattern until cancelled"
+        onPress={() => Vibration.vibrate(PATTERN, true)}
+      />
+      <Separator />
+
+      <Button title="Stop vibration pattern" onPress={() => Vibration.cancel()} color="#FF0000" />
     </ThemedView>
   );
 }
+
+const styles = StyleSheet.create({
+  paragraph: {
+    marginVertical: 16,
+    textAlign: 'center',
+  },
+  separator: {
+    marginVertical: 8,
+    borderBottomColor: '#737373',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+});
