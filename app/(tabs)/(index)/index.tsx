@@ -4,6 +4,9 @@ import { Stack } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState, useEffect } from 'react';
 import { Accelerometer } from 'expo-sensors';
+import * as Haptics from 'expo-haptics';
+import { Button } from 'react-native';
+
 
 type Coordinates = {
   x: number;
@@ -40,6 +43,13 @@ export default function HomeScreen() {
       <ThemedText>x: {x}</ThemedText>
       <ThemedText>y: {y}</ThemedText>
       <ThemedText>z: {z}</ThemedText>
+              <Button
+          title="button"
+          onPress={
+            () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+          }
+        />
+
     </ThemedView>
   );
 
