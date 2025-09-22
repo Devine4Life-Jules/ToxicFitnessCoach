@@ -1,49 +1,35 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Coffee, coffees } from '@/data/coffees';
-import { FlashList } from "@shopify/flash-list";
-import { Pressable, Text } from 'react-native';
-import { Image } from 'react-native';
-import { Link, Stack } from 'expo-router';
-import { useOrderStore } from '@/hooks/use-order-store';
+import { Stack } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useState, useEffect } from 'react';
+import { Accelerometer } from 'expo-sensors';
 
-const MyList = () => {
-
-  const orderCoffee = useOrderStore(state => state.orderCoffee);
-
-  return (
-    <FlashList
-      data={coffees}
-      renderItem={({ item }) => (
-      <Link href={`/(tabs)/(index)/${item.id}`}>
-        <ThemedView style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
-        }}>
-          <Image source={item.image} style={{ width: 50, height: 50 }} />
-          <ThemedView style={{ flex: 1 }}>
-            <ThemedText type='defaultSemiBold'>{item.name}</ThemedText>
-            <ThemedText>{item.price.toLocaleString("be-NL", { style: "currency", currency: "EUR" })}</ThemedText>
-          </ThemedView>
-          <Pressable
-            onPress={() => orderCoffee(item)}
-            style={({pressed}) => [
-              {
-                opacity: pressed ? 0.5 : 1.0,
-                padding: 8,
-              },
-            ]}>
-            <Ionicons name='add-circle' size={24} />
-          </Pressable>
-        </ThemedView>
-      </Link>)}
-    />
-  );
+type Coordinates = {
+  x: number;
+  y: number;
+  z: number;
 };
 
+
+
+
+
+
 export default function HomeScreen() {
+
+    const [{ x, y, z }, setData] = useState<Coordinates>({
+    x: 0,
+    y: 0,
+    z: 0,
+  });
+
+  useEffect(() => {
+    Accelerometer.setUpdateInterval(2000);
+    const subscription = Accelerometer.addListener(setData);
+    return () => subscription.remove();
+  }, []);
+
   return (
     <ThemedView style={{ flex: 1 }}>
       <Stack.Screen
@@ -51,7 +37,10 @@ export default function HomeScreen() {
         
         
       />
-      <ThemedText>test</ThemedText>
+      <ThemedText>x: {x}</ThemedText>
+      <ThemedText>y: {y}</ThemedText>
+      <ThemedText>z: {z}</ThemedText>
     </ThemedView>
   );
+
 }
