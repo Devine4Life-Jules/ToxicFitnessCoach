@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
 import type { Coordinates } from './useAccelerometer';
 
+
 export function useIdleDetection(
   enabled: boolean,
   data: Coordinates,
