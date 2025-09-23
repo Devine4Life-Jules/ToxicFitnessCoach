@@ -1,14 +1,27 @@
 import { View, Pressable, StyleSheet } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as Haptics from 'expo-haptics';
 
 type Props = {
   onPress: () => void;
+  idleEnabled: boolean;
 };
 
-export default function CircleButton({ onPress }: Props) {
+export default function CircleButton({ onPress, idleEnabled }: Props) {
+  const handlePress = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    onPress();
+  };
+
   return (
     <View style={styles.circleButtonContainer}>
-      <Pressable style={styles.circleButton} onPress={onPress}>
+      <Pressable
+        style={[
+          styles.circleButton,
+          { backgroundColor: idleEnabled ? '#91faa2ff' : '#f96969ff' },
+        ]}
+        onPress={handlePress}
+      >
         <MaterialIcons name="sports" size={38} color="#25292e" />
       </Pressable>
     </View>
@@ -30,6 +43,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 42,
-    backgroundColor: '#91faa2ff',
   },
 });
