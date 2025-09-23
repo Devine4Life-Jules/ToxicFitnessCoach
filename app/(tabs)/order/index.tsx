@@ -27,7 +27,7 @@ export default function OrderScreen() {
 
   const startIOSVibration = () => {
     if (iosInterval.current) return; // already running
-    iosInterval.current = setInterval(() => {
+    const iosInterval = useRef<number | null>(null);(() => {
       Vibration.vibrate(500); // vibrate for 0.5s repeatedly
     }, 500);
   };
