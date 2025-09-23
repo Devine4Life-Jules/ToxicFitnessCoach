@@ -4,7 +4,7 @@ import { AccelerometerDisplay } from '@/hooks/AccelometerDisplay';
 import { useAccelerometer } from '@/hooks/useAccelerometer';
 import { useIdleDetection } from '@/hooks/useIdleDetection';
 import Toast from 'react-native-toast-message';
-
+import CircleButton from '@/components/CircleButton';
 
 export default function HomeScreen() {
   const coords = useAccelerometer(1000);
@@ -33,6 +33,7 @@ useIdleDetection(
     <ThemedView style={{ flex: 1, padding: 16 }}>
       <Stack.Screen options={{ title: 'Toxic Fitness Coach' }} />
       <AccelerometerDisplay {...coords} />
+      <CircleButton onPress={() => alert('pressed')} />
     </ThemedView>
   );
 }
