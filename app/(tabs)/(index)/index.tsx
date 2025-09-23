@@ -16,7 +16,7 @@ export default function HomeScreen() {
 
   const lastMovement = useRef<number>(Date.now());
   const lastCoords = useRef<Coordinates>({ x: 0, y: 0, z: 0 });
-  const idleTimeout = useRef<NodeJS.Timeout | null>(null);
+const idleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const MOVEMENT_THRESHOLD = 0.02; // minimal movement to reset idle timer
   const IDLE_TIME_MS = 10000; // 10 seconds
