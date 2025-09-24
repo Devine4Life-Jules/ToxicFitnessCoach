@@ -24,15 +24,15 @@ export default function TabLayout() {
         name="(index)"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, focused }) => <Ionicons size={28} name={focused ? 'cafe' : 'cafe-outline'} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Ionicons size={28} name={focused ? 'barbell' : 'barbell-outline'} color={color} />,
         }}
       />
       <Tabs.Screen
         name="order"
         options={{
-          title: 'Order',
+          title: 'settings',
           tabBarBadge: coffeeCount > 0 ? coffeeCount : undefined,
-          tabBarIcon: ({ color, focused }) => <Ionicons size={28} name={focused ? 'cart' : 'cart-outline'} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Ionicons size={28} name={focused ? 'settings' : 'settings-outline'} color={color} />,
         }}
       />
     </Tabs>
