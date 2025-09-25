@@ -4,11 +4,12 @@ import { AccelerometerDisplay } from '@/hooks/AccelometerDisplay';
 import { useAccelerometer } from '@/hooks/useAccelerometer';
 import { useIdleDetection } from '@/hooks/useIdleDetection';
 import CircleButton from '@/components/CircleButton';
-import { StyleSheet, AppState, TextInput, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { StyleSheet, AppState, TextInput, View, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import CountdownTimer from '@/components/CountdownTimer';
 import * as Speech from 'expo-speech';
 import Toast from 'react-native-toast-message';
+import coach from '../../../assets/images/coach.png';
 
 export default function HomeScreen() {
   const coords = useAccelerometer(1000);
@@ -37,7 +38,6 @@ export default function HomeScreen() {
     "Move it, move it!",
     "Are you a statue now?",
     "Lazy bum detected!",
-    "Your couch misses you, but your body doesn't!",
     "Let's go, slacker!",
     "Up and at 'em!",
     "You call that fitness?",
@@ -45,7 +45,8 @@ export default function HomeScreen() {
     "You can do better!",
     "The world won't wait for you!",
     "Don't make me come over there!",
-    "Activate beast mode!"
+    "Activate beast mode!",
+    "just do it!"
   ];
 
   function getRandomMessage() {
@@ -142,13 +143,20 @@ export default function HomeScreen() {
             />
           </View>
         </View>
+        <ThemedView style={{ alignItems: 'center' }}>
+          <Image
+            source={coach}
+            style={{ width: 150, height: 150, marginBottom: 8 }}
+            resizeMode="contain"
+          />
+        </ThemedView>
         <CountdownTimer
           duration={idleTime}
           resetTrigger={idleEnabled ? resetKey : -1}
           onTimeout={() => setResetKey(k => k + 1)}
           inactive={!idleEnabled}
         />
-        <AccelerometerDisplay {...coords} />
+        {/* <AccelerometerDisplay {...coords} /> */}
 
         <ThemedView style={styles.buttonContainer}>
           <CircleButton idleEnabled={idleEnabled} onPress={toggleIdleDetection} />
