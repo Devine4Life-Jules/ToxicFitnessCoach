@@ -18,11 +18,16 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ duration, resetTrigger,
   }, [resetTrigger, duration]);
 
   useEffect(() => {
+    let timeoutId: number;
+    
     if (inactive) {
-      setTimeLeft(duration);
-      setHasVibrated(false);
+      requestAnimationFrame(() => {
+        setTimeLeft(duration);
+        setHasVibrated(false);
+      });
       return;
     }
+    
     if (timeLeft <= 0) {
       if (!hasVibrated) {
         // Strong vibration pattern
@@ -33,13 +38,23 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ duration, resetTrigger,
         }
         setHasVibrated(true);
       }
-      onTimeout();
-      return;
+      // Schedule onTimeout callback
+      timeoutId = requestAnimationFrame(() => {
+        onTimeout();
+      });
+      return () => cancelAnimationFrame(timeoutId);
     }
+    
     const interval = setInterval(() => {
       setTimeLeft(prev => prev - 1000);
     }, 1000);
-    return () => clearInterval(interval);
+    
+    return () => {
+      clearInterval(interval);
+      if (timeoutId) {
+        cancelAnimationFrame(timeoutId);
+      }
+    };
   }, [timeLeft, onTimeout, inactive, duration, hasVibrated]);
 
   const seconds = Math.max(0, Math.floor((timeLeft / 1000) % 60));

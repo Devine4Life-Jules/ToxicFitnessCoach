@@ -27,13 +27,29 @@ import coach from '../../../assets/images/coach.png';
 // Configure notifications
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    // `shouldShowAlert` is deprecated — prefer banner/list flags
     shouldPlaySound: true,
     shouldSetBadge: false,
     shouldShowBanner: true,
     shouldShowList: true,
   }),
 });
+
+// Helper to defer toasts and notifications so they don't run during render
+const deferredNotify = (toastOptions?: any, notificationContent?: any) => {
+  if (toastOptions) {
+    // ensure toast runs after render
+    requestAnimationFrame(() => {
+      try { Toast.show(toastOptions); } catch (e) { console.warn('Toast error', e); }
+    });
+  }
+  if (notificationContent) {
+    // schedule notification off the current call stack
+    setTimeout(() => {
+      Notifications.scheduleNotificationAsync({ content: notificationContent, trigger: null }).catch(e => console.warn('Notification error', e));
+    }, 0);
+  }
+};
 
 export default function HomeScreen() {
   const coords = useAccelerometer(1000);
@@ -97,21 +113,8 @@ export default function HomeScreen() {
       voice: 'com.apple.voice.compact.en-GB.Daniel'
     });
     
-    // Show toast message
-    Toast.show({
-      type: 'info',
-      text1: message,
-    });
-    
-    // Show system notification
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Toxic Fitness Coach',
-        body: message,
-        sound: true,
-      },
-      trigger: null,
-    });
+    // Show toast message + system notification (deferred)
+    deferredNotify({ type: 'info', text1: message }, { title: 'Toxic Fitness Coach', body: message, sound: true });
     
     setResetKey(k => k + 1);
   }, [getRandomMessage]);
@@ -124,22 +127,8 @@ export default function HomeScreen() {
       voice: 'com.apple.voice.compact.en-GB.Daniel'
     });
     
-    // Show toast message
-    Toast.show({
-      type: 'success',
-      text1: 'Device moved',
-      text2: 'Movement detected.',
-    });
-    
-    // Show system notification
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Movement Detected',
-        body: 'Good job! Keep moving!',
-        sound: true,
-      },
-      trigger: null,
-    });
+    // Show toast message + system notification (deferred)
+    deferredNotify({ type: 'success', text1: 'Device moved', text2: 'Movement detected.' }, { title: 'Movement Detected', body: 'Good job! Keep moving!', sound: true });
     
     setResetKey(k => k + 1);
   }, []);
@@ -159,17 +148,11 @@ export default function HomeScreen() {
   const toggleIdleDetection = async () => {
     setIdleEnabled(prev => {
       const next = !prev;
-      Toast.show({
-        type: 'info',
-        text1: next ? 'Idle detection turned on' : 'Idle detection turned off',
-      });
+      deferredNotify({ type: 'info', text1: next ? 'Idle detection turned on' : 'Idle detection turned off' });
       // If turning off, schedule lazy bum notification after 10s
       if (!next) {
         lazyBumTimeout.current = setTimeout(() => {
-          Toast.show({
-            type: 'info',
-            text1: 'turn me on you lazy bum',
-          });
+          deferredNotify({ type: 'info', text1: 'turn me on you lazy bum' });
         }, 10000);
       } else {
         // If turning on, clear any pending lazy bum notification
@@ -192,10 +175,16 @@ export default function HomeScreen() {
           resizeMode="contain"
         />
       </ThemedView>
+      {/* Memoize the timeout handler */}
       <CountdownTimer
         duration={idleTime}
         resetTrigger={idleEnabled ? resetKey : -1}
-        onTimeout={useCallback(() => setResetKey(k => k + 1), [])}
+        onTimeout={useCallback(() => {
+          // Use requestAnimationFrame to ensure we're not updating during render
+          requestAnimationFrame(() => {
+            setResetKey(k => k + 1);
+          });
+        }, [])}
         inactive={!idleEnabled || isSettingsTabActive}
       />
       
