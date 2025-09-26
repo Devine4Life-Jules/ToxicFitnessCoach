@@ -1,11 +1,25 @@
 import { Stack } from 'expo-router';
 import { ThemedView } from '@/components/themed-view';
 import { StyleSheet, TextInput, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { useState } from 'react';
+import { useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSettingsStore } from '@/hooks/use-settings-store';
 
 export default function SettingsScreen() {
-  const { idleMinutes, idleSeconds, setIdleMinutes, setIdleSeconds } = useSettingsStore();
+  const { 
+    idleMinutes, 
+    idleSeconds, 
+    setIdleMinutes, 
+    setIdleSeconds, 
+    setSettingsTabActive 
+  } = useSettingsStore();
+
+  useFocusEffect(
+    useCallback(() => {
+      setSettingsTabActive(true);
+      return () => setSettingsTabActive(false);
+    }, [setSettingsTabActive])
+  );
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>

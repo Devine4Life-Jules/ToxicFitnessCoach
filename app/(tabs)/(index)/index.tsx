@@ -5,19 +5,52 @@ import { useAccelerometer } from '@/hooks/useAccelerometer';
 import { useIdleDetection } from '@/hooks/useIdleDetection';
 import CircleButton from '@/components/CircleButton';
 import { StyleSheet, AppState, Image } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import CountdownTimer from '@/components/CountdownTimer';
 import * as Speech from 'expo-speech';
 import Toast from 'react-native-toast-message';
+import * as Notifications from 'expo-notifications';
+
+// Voice configuration for consistent male English voice
+const initializeVoice = async () => {
+  const voices = await Speech.getAvailableVoicesAsync();
+  return voices.find(voice => 
+    voice.language.startsWith('en') && 
+    voice.quality === Speech.VoiceQuality.Enhanced &&
+    voice.gender === 'male'
+  )?.identifier;
+};
 import { useSettingsStore } from '@/hooks/use-settings-store';
 import coach from '../../../assets/images/coach.png';
+
+// Configure notifications
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function HomeScreen() {
   const coords = useAccelerometer(1000);
   const [idleEnabled, setIdleEnabled] = useState(true);
-  const { idleMinutes, idleSeconds } = useSettingsStore();
+  const { idleMinutes, idleSeconds, isSettingsTabActive } = useSettingsStore();
   const idleTime = (idleMinutes * 60 + idleSeconds) * 1000;
   const appState = useRef(AppState.currentState);
+
+  // Request notification permissions
+  useEffect(() => {
+    async function requestPermissions() {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Notification permissions not granted');
+      }
+    }
+    requestPermissions();
+  }, []);
 
     // For timer reset
     const [resetKey, setResetKey] = useState(0);
@@ -31,7 +64,7 @@ export default function HomeScreen() {
   }, []);
 
   // List of random activation/insult messages
-  const activationMessages = [
+  const activationMessages = useMemo(() => [
     "Get moving!",
     "Don't just sit there!",
     "Time to shake that booty!",
@@ -47,37 +80,74 @@ export default function HomeScreen() {
     "Don't make me come over there!",
     "Activate beast mode!",
     "just do it!"
-  ];
+  ], []);
 
-  function getRandomMessage() {
+  const getRandomMessage = useCallback(() => {
     const idx = Math.floor(Math.random() * activationMessages.length);
     return activationMessages[idx];
-  }
+  }, [activationMessages]);
+
+  const handleIdle = useCallback(async () => {
+    const message = getRandomMessage();
+    Speech.speak(message, {
+      language: 'en-GB',
+      pitch: 0.9,
+      rate: 0.9,
+      voice: 'com.apple.voice.compact.en-GB.Daniel'
+    });
+    
+    // Show toast message
+    Toast.show({
+      type: 'info',
+      text1: message,
+    });
+    
+    // Show system notification
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Toxic Fitness Coach',
+        body: message,
+        sound: true,
+      },
+      trigger: null,
+    });
+    
+    setResetKey(k => k + 1);
+  }, [getRandomMessage]);
+
+  const handleMovement = useCallback(async () => {
+    Speech.speak('Movement detected.', {
+      language: 'en-GB',
+      pitch: 0.9,
+      rate: 0.9,
+      voice: 'com.apple.voice.compact.en-GB.Daniel'
+    });
+    
+    // Show toast message
+    Toast.show({
+      type: 'success',
+      text1: 'Device moved',
+      text2: 'Movement detected.',
+    });
+    
+    // Show system notification
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Movement Detected',
+        body: 'Good job! Keep moving!',
+        sound: true,
+      },
+      trigger: null,
+    });
+    
+    setResetKey(k => k + 1);
+  }, []);
 
   useIdleDetection(
     idleEnabled,
     coords,
-    async () => {
-      // Timer ran out (idle)
-      setResetKey(k => k + 1);
-      const message = getRandomMessage();
-      // Speak the notification aloud
-      Speech.speak(message);
-      Toast.show({
-        type: 'info',
-        text1: message,
-      });
-    },
-    async () => {
-      // Movement detected
-      setResetKey(k => k + 1);
-      Speech.speak('Movement detected.');
-      Toast.show({
-        type: 'success',
-        text1: 'Device moved',
-        text2: 'Movement detected.',
-      });
-    },
+    handleIdle,
+    handleMovement,
     0.02,
     idleTime
   );
@@ -94,7 +164,7 @@ export default function HomeScreen() {
       });
       // If turning off, schedule lazy bum notification after 10s
       if (!next) {
-        lazyBumTimeout.current = window.setTimeout(() => {
+        lazyBumTimeout.current = setTimeout(() => {
           Toast.show({
             type: 'info',
             text1: 'turn me on you lazy bum',
@@ -124,8 +194,8 @@ export default function HomeScreen() {
       <CountdownTimer
         duration={idleTime}
         resetTrigger={idleEnabled ? resetKey : -1}
-        onTimeout={() => setResetKey(k => k + 1)}
-        inactive={!idleEnabled}
+        onTimeout={useCallback(() => setResetKey(k => k + 1), [])}
+        inactive={!idleEnabled || isSettingsTabActive}
       />
       {/* <AccelerometerDisplay {...coords} /> */}
 

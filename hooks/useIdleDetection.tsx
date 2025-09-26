@@ -8,7 +8,7 @@ export function useIdleDetection(
   data: Coordinates,
   onIdle: () => void,
   onMove?: () => void,
-  threshold: number = 0.02,
+  threshold: number = 0.03,
   idleTime: number = 10000
 ) {
   const lastCoords = useRef<Coordinates>(data);
