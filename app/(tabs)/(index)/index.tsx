@@ -4,6 +4,7 @@ import { AccelerometerDisplay } from '@/hooks/AccelometerDisplay';
 import { useAccelerometer } from '@/hooks/useAccelerometer';
 import { useIdleDetection } from '@/hooks/useIdleDetection';
 import CircleButton from '@/components/CircleButton';
+import { StepCounter } from '@/components/StepCounter';
 import { StyleSheet, AppState, Image } from 'react-native';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import CountdownTimer from '@/components/CountdownTimer';
@@ -197,6 +198,8 @@ export default function HomeScreen() {
         onTimeout={useCallback(() => setResetKey(k => k + 1), [])}
         inactive={!idleEnabled || isSettingsTabActive}
       />
+      
+      <StepCounter />
       {/* <AccelerometerDisplay {...coords} /> */}
 
       <ThemedView style={styles.buttonContainer}>
