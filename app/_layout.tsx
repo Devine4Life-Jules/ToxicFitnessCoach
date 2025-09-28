@@ -11,7 +11,6 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-// 👇 ensures iOS shows notifications even in foreground
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: true,

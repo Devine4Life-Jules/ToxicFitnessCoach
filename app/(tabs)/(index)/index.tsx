@@ -12,29 +12,10 @@ import * as Notifications from 'expo-notifications';
 import { useSettingsStore } from '@/hooks/use-settings-store';
 import coach from '../../../assets/images/coach.png';
 
-// Voice configuration for consistent male English voice
-const initializeVoice = async () => {
-  const voices = await Speech.getAvailableVoicesAsync();
-  // Prefer a known male British voice identifier if available
-  const preferred = [
-    'com.apple.voice.compact.en-GB.Daniel',
-    'com.apple.ttsbundle.Daniel-compact',
-    'en-GB-Standard-D',
-  ];
-  const foundPref = voices.find(v => v.identifier && preferred.includes(v.identifier));
-  if (foundPref) return foundPref.identifier;
 
-  // Otherwise pick an enhanced English voice, or any English voice as fallback
-  const enhancedEn = voices.find(v => v.language?.startsWith('en') && v.quality === Speech.VoiceQuality.Enhanced);
-  if (enhancedEn) return enhancedEn.identifier;
 
-  return voices.find(v => v.language?.startsWith('en'))?.identifier;
-};
-
-// Configure notifications
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    // `shouldShowAlert` is deprecated — prefer banner/list flags
     shouldPlaySound: true,
     shouldSetBadge: false,
     shouldShowBanner: true,
@@ -42,10 +23,8 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// Helper to defer system notifications so they don't run during render
 const deferredNotify = (notificationContent?: any) => {
   if (notificationContent) {
-    // schedule notification off the current call stack
     setTimeout(() => {
       Notifications.scheduleNotificationAsync({ content: notificationContent, trigger: null }).catch(e => console.warn('Notification error', e));
     }, 0);
@@ -59,7 +38,6 @@ export default function HomeScreen() {
   const idleTime = (idleMinutes * 60 + idleSeconds) * 1000;
   const appState = useRef(AppState.currentState);
 
-  // Request notification permissions
   useEffect(() => {
     async function requestPermissions() {
       const { status } = await Notifications.requestPermissionsAsync();
@@ -70,10 +48,8 @@ export default function HomeScreen() {
     requestPermissions();
   }, []);
 
-    // For timer reset
     const [resetKey, setResetKey] = useState(0);
 
-  // Track app state
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
       appState.current = nextAppState;
@@ -81,7 +57,6 @@ export default function HomeScreen() {
     return () => subscription.remove();
   }, []);
 
-  // List of random activation/insult messages
   const activationMessages = useMemo(() => [
     "Get moving!",
     "Don't just sit there!",
@@ -114,7 +89,6 @@ export default function HomeScreen() {
       voice: 'com.apple.voice.compact.en-GB.Daniel'
     });
     
-  // Show system notification (deferred)
   deferredNotify({ title: 'Toxic Fitness Coach', body: message, sound: true });
     
     setResetKey(k => k + 1);
@@ -128,7 +102,6 @@ export default function HomeScreen() {
       voice: 'com.apple.voice.compact.en-GB.Daniel'
     });
     
-  // Show system notification (deferred)
   deferredNotify({ title: 'Movement Detected', body: 'Good job! Keep moving!', sound: true });
     
     setResetKey(k => k + 1);
@@ -143,20 +116,17 @@ export default function HomeScreen() {
     idleTime
   );
 
-  // Track lazy bum notification timeout
   const lazyBumTimeout = useRef<number | null>(null);
 
   const toggleIdleDetection = async () => {
     setIdleEnabled(prev => {
       const next = !prev;
       deferredNotify({ type: 'info', text1: next ? 'Idle detection turned on' : 'Idle detection turned off' });
-      // If turning off, schedule lazy bum notification after 10s
       if (!next) {
         lazyBumTimeout.current = setTimeout(() => {
           deferredNotify({ type: 'info', text1: 'turn me on you lazy bum' });
         }, 10000);
       } else {
-        // If turning on, clear any pending lazy bum notification
         if (lazyBumTimeout.current) {
           clearTimeout(lazyBumTimeout.current);
           lazyBumTimeout.current = null;
@@ -176,12 +146,10 @@ export default function HomeScreen() {
           resizeMode="contain"
         />
       </ThemedView>
-      {/* Memoize the timeout handler */}
       <CountdownTimer
         duration={idleTime}
         resetTrigger={idleEnabled ? resetKey : -1}
         onTimeout={useCallback(() => {
-          // Use requestAnimationFrame to ensure we're not updating during render
           requestAnimationFrame(() => {
             setResetKey(k => k + 1);
           });
@@ -190,7 +158,6 @@ export default function HomeScreen() {
       />
       
       <StepCounter />
-      {/* <AccelerometerDisplay {...coords} /> */}
 
       <ThemedView style={styles.buttonContainer}>
         <CircleButton idleEnabled={idleEnabled} onPress={toggleIdleDetection} />
