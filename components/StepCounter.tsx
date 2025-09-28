@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Pedometer } from 'expo-sensors';
 import { ThemedView } from './themed-view';
 import { ThemedText } from './themed-text';
 import { FontAwesome5 } from '@expo/vector-icons';
-import Toast from 'react-native-toast-message';
 
 export const StepCounter = () => {
   const [stepCount, setStepCount] = useState(0);
@@ -69,21 +68,6 @@ export const StepCounter = () => {
     return null;
   }
 
-  const handleReset = () => {
-    setStepCount(0);
-    // Defer toast to avoid updating during render
-    requestAnimationFrame(() => {
-      try {
-        Toast.show({
-          type: 'info',
-          text1: 'Step counter reset',
-          text2: 'Starting fresh!',
-        });
-      } catch (e) {
-        console.warn('Toast error', e);
-      }
-    });
-  };
 
   return (
     <ThemedView style={styles.container}>
@@ -94,9 +78,7 @@ export const StepCounter = () => {
           <Text style={styles.label}>Steps Today</Text>
           <ThemedText style={styles.message}>{getCoachMessage(stepCount)}</ThemedText>
         </View>
-        <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
-          <FontAwesome5 name="redo" size={16} color="#666" />
-        </TouchableOpacity>
+        {/* reset button removed */}
       </ThemedView>
     </ThemedView>
   );
@@ -130,12 +112,6 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    marginLeft: 16,
-  },
-  resetButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: '#333',
     marginLeft: 16,
   },
   icon: {
