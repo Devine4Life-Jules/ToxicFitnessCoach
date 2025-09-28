@@ -11,18 +11,27 @@ import CountdownTimer from '@/components/CountdownTimer';
 import * as Speech from 'expo-speech';
 import Toast from 'react-native-toast-message';
 import * as Notifications from 'expo-notifications';
+import { useSettingsStore } from '@/hooks/use-settings-store';
+import coach from '../../../assets/images/coach.png';
 
 // Voice configuration for consistent male English voice
 const initializeVoice = async () => {
   const voices = await Speech.getAvailableVoicesAsync();
-  return voices.find(voice => 
-    voice.language.startsWith('en') && 
-    voice.quality === Speech.VoiceQuality.Enhanced &&
-    voice.gender === 'male'
-  )?.identifier;
+  // Prefer a known male British voice identifier if available
+  const preferred = [
+    'com.apple.voice.compact.en-GB.Daniel',
+    'com.apple.ttsbundle.Daniel-compact',
+    'en-GB-Standard-D',
+  ];
+  const foundPref = voices.find(v => v.identifier && preferred.includes(v.identifier));
+  if (foundPref) return foundPref.identifier;
+
+  // Otherwise pick an enhanced English voice, or any English voice as fallback
+  const enhancedEn = voices.find(v => v.language?.startsWith('en') && v.quality === Speech.VoiceQuality.Enhanced);
+  if (enhancedEn) return enhancedEn.identifier;
+
+  return voices.find(v => v.language?.startsWith('en'))?.identifier;
 };
-import { useSettingsStore } from '@/hooks/use-settings-store';
-import coach from '../../../assets/images/coach.png';
 
 // Configure notifications
 Notifications.setNotificationHandler({

@@ -4,6 +4,7 @@ import { StyleSheet, TextInput, View, TouchableWithoutFeedback, Keyboard } from 
 import { useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSettingsStore } from '@/hooks/use-settings-store';
+import { ThemedText } from '@/components/themed-text';
 
 export default function SettingsScreen() {
   const { 
@@ -25,6 +26,7 @@ export default function SettingsScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <ThemedView style={{ flex: 1, padding: 16 }}>
         <Stack.Screen options={{ title: 'Settings' }} />
+        <ThemedText style={{ textAlign: 'center', marginBottom: 15 }}>Idle Timer</ThemedText>
         <View style={styles.inputContainer}>
           <View style={styles.row}>
             <TextInput

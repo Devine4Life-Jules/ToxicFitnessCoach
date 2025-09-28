@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Pedometer } from 'expo-sensors';
 import { ThemedView } from './themed-view';
+import { ThemedText } from './themed-text';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 
@@ -91,6 +92,7 @@ export const StepCounter = () => {
         <View style={styles.textContainer}>
           <Text style={styles.stepCount}>{stepCount.toLocaleString()}</Text>
           <Text style={styles.label}>Steps Today</Text>
+          <ThemedText style={styles.message}>{getCoachMessage(stepCount)}</ThemedText>
         </View>
         <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
           <FontAwesome5 name="redo" size={16} color="#666" />
@@ -99,6 +101,15 @@ export const StepCounter = () => {
     </ThemedView>
   );
 };
+
+function getCoachMessage(steps: number) {
+  // Messages get more negative the fewer steps you have, but never fully positive
+  if (steps < 500) return "What is that? A napathon? Try walking, human.";
+  if (steps < 2000) return "Cute. That's not a workout, it's a warmup. Do better.";
+  if (steps < 5000) return "Meh. You're moving... barely. Try harder.";
+  if (steps < 10000) return "Alright, not awful. Don't get a big head though.";
+  return "Okay, you're moving. Still not impressed, but I'll tolerate it.";
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -139,5 +150,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888',
     marginTop: 4,
+  },
+  message: {
+    marginTop: 6,
+    color: '#ccc',
+    fontSize: 13,
   },
 });
