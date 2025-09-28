@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Text, StyleSheet, Platform, Vibration } from 'react-native';
 
 interface CountdownTimerProps {
-  duration: number; // ms
-  resetTrigger: any; // change this value to reset timer
+  duration: number; 
+  resetTrigger: any; 
   onTimeout: () => void;
   inactive?: boolean;
 }
@@ -30,7 +30,6 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ duration, resetTrigger,
     
     if (timeLeft <= 0) {
       if (!hasVibrated) {
-        // Strong vibration pattern
         if (Platform.OS === 'android') {
           Vibration.vibrate([0, 1000, 500, 1000]);
         } else {
@@ -38,7 +37,6 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ duration, resetTrigger,
         }
         setHasVibrated(true);
       }
-      // Schedule onTimeout callback
       timeoutId = requestAnimationFrame(() => {
         onTimeout();
       });

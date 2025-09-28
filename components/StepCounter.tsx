@@ -31,15 +31,11 @@ export const StepCounter = () => {
         setIsPedometerAvailable(isAvailable);
 
         if (isAvailable) {
-          // Initial step count
           await updateStepCount();
           
-          // Poll every 10 seconds to ensure accuracy
           pollInterval = setInterval(updateStepCount, 10000);
 
-          // Subscribe to pedometer updates
           subscription = Pedometer.watchStepCount(result => {
-            // Get current steps again to ensure accuracy
             Pedometer.getStepCountAsync(startOfToday, new Date())
               .then(currentSteps => {
                 setStepCount(currentSteps?.steps ?? 0);
@@ -78,14 +74,12 @@ export const StepCounter = () => {
           <Text style={styles.label}>Steps Today</Text>
           <ThemedText style={styles.message}>{getCoachMessage(stepCount)}</ThemedText>
         </View>
-        {/* reset button removed */}
       </ThemedView>
     </ThemedView>
   );
 };
 
 function getCoachMessage(steps: number) {
-  // Messages get more negative the fewer steps you have, but never fully positive
   if (steps < 500) return "What is that? A napathon? Try walking, human.";
   if (steps < 2000) return "Cute. That's not a workout, it's a warmup. Do better.";
   if (steps < 5000) return "Meh. You're moving... barely. Try harder.";

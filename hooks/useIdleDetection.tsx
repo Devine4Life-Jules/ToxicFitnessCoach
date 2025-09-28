@@ -33,13 +33,12 @@ export function useIdleDetection(
     const isMoving = dx > threshold || dy > threshold || dz > threshold;
 
     if (isMoving) {
-      // Only fire onMove once per movement
       if (!hasMoved.current) {
         onMove?.();
         hasMoved.current = true;
       }
 
-      // Reset idle timeout if it exists
+
       if (idleTimeout.current) {
         clearTimeout(idleTimeout.current);
         idleTimeout.current = null;
@@ -47,14 +46,14 @@ export function useIdleDetection(
 
       lastCoords.current = data;
     } else {
-      // Device is still
+
       hasMoved.current = false;
 
       if (!idleTimeout.current) {
         idleTimeout.current = setTimeout(() => {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           onIdle();
-          idleTimeout.current = null; // allow next idle
+          idleTimeout.current = null; 
         }, idleTime);
       }
     }

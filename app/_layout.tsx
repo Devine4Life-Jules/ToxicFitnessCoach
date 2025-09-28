@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react';
-import { Button } from 'react-native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import Toast from 'react-native-toast-message';
 import * as Notifications from 'expo-notifications';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -16,9 +14,10 @@ export const unstable_settings = {
 // 👇 ensures iOS shows notifications even in foreground
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -52,7 +51,6 @@ export default function RootLayout() {
 
   
 
-      <Toast />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

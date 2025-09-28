@@ -1,6 +1,5 @@
 import { Stack } from 'expo-router';
 import { ThemedView } from '@/components/themed-view';
-import { AccelerometerDisplay } from '@/hooks/AccelometerDisplay';
 import { useAccelerometer } from '@/hooks/useAccelerometer';
 import { useIdleDetection } from '@/hooks/useIdleDetection';
 import CircleButton from '@/components/CircleButton';
@@ -9,7 +8,6 @@ import { StyleSheet, AppState, Image } from 'react-native';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import CountdownTimer from '@/components/CountdownTimer';
 import * as Speech from 'expo-speech';
-import Toast from 'react-native-toast-message';
 import * as Notifications from 'expo-notifications';
 import { useSettingsStore } from '@/hooks/use-settings-store';
 import coach from '../../../assets/images/coach.png';
@@ -44,14 +42,8 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// Helper to defer toasts and notifications so they don't run during render
-const deferredNotify = (toastOptions?: any, notificationContent?: any) => {
-  if (toastOptions) {
-    // ensure toast runs after render
-    requestAnimationFrame(() => {
-      try { Toast.show(toastOptions); } catch (e) { console.warn('Toast error', e); }
-    });
-  }
+// Helper to defer system notifications so they don't run during render
+const deferredNotify = (notificationContent?: any) => {
   if (notificationContent) {
     // schedule notification off the current call stack
     setTimeout(() => {
@@ -122,8 +114,8 @@ export default function HomeScreen() {
       voice: 'com.apple.voice.compact.en-GB.Daniel'
     });
     
-    // Show toast message + system notification (deferred)
-    deferredNotify({ type: 'info', text1: message }, { title: 'Toxic Fitness Coach', body: message, sound: true });
+  // Show system notification (deferred)
+  deferredNotify({ title: 'Toxic Fitness Coach', body: message, sound: true });
     
     setResetKey(k => k + 1);
   }, [getRandomMessage]);
@@ -136,8 +128,8 @@ export default function HomeScreen() {
       voice: 'com.apple.voice.compact.en-GB.Daniel'
     });
     
-    // Show toast message + system notification (deferred)
-    deferredNotify({ type: 'success', text1: 'Device moved', text2: 'Movement detected.' }, { title: 'Movement Detected', body: 'Good job! Keep moving!', sound: true });
+  // Show system notification (deferred)
+  deferredNotify({ title: 'Movement Detected', body: 'Good job! Keep moving!', sound: true });
     
     setResetKey(k => k + 1);
   }, []);
